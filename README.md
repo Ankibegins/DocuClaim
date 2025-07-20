@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # 🧠 ClauseMind – Intelligent Clause Retriever & Decision System
 
 An intelligent system that uses LLM-powered semantic search to retrieve relevant clauses from insurance documents and provide automated decision-making.
@@ -269,3 +270,6 @@ For support and questions:
 ---
 
 **Built with ❤️ using FastAPI, LangChain, and Google Gemini** 
+=======
+# DocuClaim
+>>>>>>> dce3533ceda687ce3333d846bdfbf37d598d1d37
