@@ -92,6 +92,9 @@ async def upload_pdf(file: UploadFile = File(...)):
     except HTTPException:
         raise
     except Exception as e:
+        import traceback
+        error_details = f"Error uploading document: {str(e)}\nTraceback: {traceback.format_exc()}"
+        print(error_details)  # Log the error for debugging
         raise HTTPException(
             status_code=500, 
             detail=f"Error uploading document: {str(e)}"
@@ -173,10 +176,13 @@ async def get_uploaded_files():
     await get_services()
     
     files = []
-    for file_path in pdf_utils.upload_dir.glob("*.pdf"):
-        file_info = pdf_utils.get_file_info(str(file_path))
-        if file_info:
-            files.append(file_info)
+    try:
+        for file_path in pdf_utils.upload_dir.glob("*.pdf"):
+            file_info = pdf_utils.get_file_info(str(file_path))
+            if file_info:
+                files.append(file_info)
+    except Exception as e:
+        print(f"Error listing files: {str(e)}")
     
     return files
 

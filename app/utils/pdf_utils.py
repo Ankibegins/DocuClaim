@@ -8,7 +8,13 @@ import aiofiles
 class PDFUtils:
     def __init__(self, upload_dir: str = "data/uploads"):
         self.upload_dir = Path(upload_dir)
-        self.upload_dir.mkdir(parents=True, exist_ok=True)
+        try:
+            self.upload_dir.mkdir(parents=True, exist_ok=True)
+        except Exception as e:
+            # Fallback to /tmp if data directory is not writable (common on cloud platforms)
+            import tempfile
+            self.upload_dir = Path(tempfile.gettempdir()) / "assurio_uploads"
+            self.upload_dir.mkdir(parents=True, exist_ok=True)
     
     async def save_pdf_file(self, file: UploadFile) -> str:
         """Save uploaded PDF file and return the file path"""
