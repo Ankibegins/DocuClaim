@@ -106,9 +106,15 @@ async def upload_pdf(file: UploadFile = File(...)):
         import traceback
         error_details = f"Error uploading document: {str(e)}\nTraceback: {traceback.format_exc()}"
         print(error_details)  # Log the error for debugging
-        raise HTTPException(
-            status_code=500, 
-            detail=f"Error uploading document: {str(e)}"
+        
+        # Return a proper JSON response instead of raising HTTPException
+        return UploadResponse(
+            status="error",
+            message=f"Error uploading document: {str(e)}",
+            filename=file.filename if file else "unknown",
+            chunks_indexed=0,
+            total_documents=0,
+            file_info={"error": str(e)}
         )
 
 @router.post("/upload_pdf_async", response_model=Dict[str, Any])
@@ -236,4 +242,26 @@ async def test_upload_endpoint():
         "status": "ok",
         "message": "Upload endpoint is accessible",
         "timestamp": "2024-08-01T16:00:00Z"
+    }
+
+@router.get("/health_check")
+async def health_check():
+    """Simple health check for Render"""
+    return {
+        "status": "healthy",
+        "service": "ASSURIO",
+        "timestamp": "2024-08-01T16:00:00Z"
+    }
+
+@router.get("/debug_upload")
+async def debug_upload():
+    """Debug endpoint to test upload response"""
+    return {
+        "status": "ok",
+        "message": "Debug upload endpoint working",
+        "test_data": {
+            "filename": "test.pdf",
+            "size": 1024,
+            "chunks": 5
+        }
     } 
