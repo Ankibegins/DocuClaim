@@ -58,29 +58,38 @@ async def get_services():
 async def upload_pdf(file: UploadFile = File(...)):
     """Upload and process a PDF document with enhanced functionality"""
     try:
+        print(f"Starting upload for file: {file.filename}")
         await get_services()
+        print("Services initialized successfully")
         
         # Validate file
         if not await pdf_utils.validate_pdf_file(file):
+            print("File validation failed")
             raise HTTPException(
                 status_code=400, 
                 detail="Invalid PDF file. Please check file type and size."
             )
+        print("File validation passed")
         
         # Save file
         file_path = await pdf_utils.save_pdf_file(file)
+        print(f"File saved to: {file_path}")
         file_info = pdf_utils.get_file_info(file_path)
         
         # Process PDF
+        print("Starting PDF processing")
         documents = await pdf_loader.load_pdf(file_path)
+        print(f"PDF processed, {len(documents)} chunks created")
         
         # Add to vector store
+        print("Adding documents to vector store")
         await vector_store.add_documents(documents)
         
         # Save index
+        print("Saving vector index")
         vector_store.save_index()
         
-        return UploadResponse(
+        result = UploadResponse(
             status="uploaded",
             message="Document uploaded and indexed successfully",
             filename=file.filename,
@@ -88,6 +97,8 @@ async def upload_pdf(file: UploadFile = File(...)):
             total_documents=vector_store.get_document_count(),
             file_info=file_info
         )
+        print(f"Upload completed successfully: {result}")
+        return result
         
     except HTTPException:
         raise
@@ -216,4 +227,13 @@ async def cleanup_old_files():
         raise HTTPException(
             status_code=500, 
             detail=f"Error during cleanup: {str(e)}"
-        ) 
+        )
+
+@router.get("/test_upload")
+async def test_upload_endpoint():
+    """Test endpoint to check if upload route is accessible"""
+    return {
+        "status": "ok",
+        "message": "Upload endpoint is accessible",
+        "timestamp": "2024-08-01T16:00:00Z"
+    } 
